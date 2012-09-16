@@ -106,7 +106,8 @@ class GtkUI:
         self.window.resize(self.window.get_size()[0], 1)
 
     def on_apply(self, button):
-        Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD).set_text(self.password,
-                                                            len(self.password))
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        clipboard.set_text(self.password, len(self.password))
+        clipboard.store()
         # TODO: wait for some time and clear clipboard
         Gtk.main_quit()
