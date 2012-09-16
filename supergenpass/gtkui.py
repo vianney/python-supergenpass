@@ -16,7 +16,7 @@
 
 import os.path
 import hashlib
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, GLib
 from . import *
 
 
@@ -109,5 +109,13 @@ class GtkUI:
         clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         clipboard.set_text(self.password, len(self.password))
         clipboard.store()
-        # TODO: wait for some time and clear clipboard
+        GLib.timeout_add_seconds(120, self.on_timeout)
+        self.window.hide()
+
+    def on_timeout(self):
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        if clipboard.wait_for_text() == self.password:
+            clipboard.set_text("", 0)
+            clipboard.store()
         Gtk.main_quit()
+        return False
