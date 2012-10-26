@@ -2,11 +2,20 @@
  SuperGenPass Python module and GTK interface
 ==============================================
 
-This project is a Python 3.x implementation of the SuperGenPass_ bookmarklet.
+This project is a Python 3.x implementation of the SuperGenPass_ bookmarklet,
+designed to be compatible with the `Android SuperGenPass utility`_.
 It provides a module to be used in other programs, a command-line interface and
 a GTK 3 interface.
 
+Compared with the original SuperGenPass_ bookmarklet, it has a number of
+additional features:
+
+* customizable hashing algorithm and password length,
+* optional salt appended to the master password,
+* PIN generation based on HOTP.
+
 .. _SuperGenPass: http://www.supergenpass.com/
+.. _Android SuperGenPass utility: http://staticfree.info/projects/sgp/
 
 
 Installation
@@ -28,9 +37,10 @@ Usage
 As a Python module
 -------------------
 
-The module is named ``supergenpass``. The two main methods are:
+The module is named ``supergenpass``. The three main methods are:
 
 * ``generate(master, domain)``: derive a SuperGenPass password,
+* ``generate_pin(master, domain)``: generate a PIN,
 * ``strip_domain(domain)``: strip a domain name/URL to its base domain name.
 
 Use Python's ``help`` function for more information.

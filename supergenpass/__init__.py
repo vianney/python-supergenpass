@@ -24,9 +24,11 @@
 
 import os.path
 import re
+import itertools
 import json
 import base64
 import hashlib
+import hmac
 import urllib.parse
 
 
@@ -70,6 +72,116 @@ def generate(master, domain, length=10, algorithm='md5'):
         password = password.replace('=', 'A')
         count += 1
     return password[:length]
+
+
+def hotp(key, counter, length=6):
+    """Generate an HMAC-based One-Time Password (HOTP), following RFC 4226.
+
+    Arguments:
+    key -- the key (bytes object)
+    counter -- the moving part (bytes object)
+    length -- number of digits in the output
+
+    """
+    # Step 1: HMAC-SHA-1
+    hs = hmac.new(key, counter, digestmod=hashlib.sha1).digest()
+    # Step 2: Dynamic Truncation
+    assert len(hs) == 20
+    offset = hs[19] & 0xf
+    p = int.from_bytes(hs[offset:offset+4], byteorder='big')
+    snum = p & 0x7fffffff
+    # Step 3: output
+    d = snum % (10 ** length)
+    return ("{:0" + str(length) + "d}").format(d)
+
+
+# Set of blacklisted PINs from Android app
+_pin_blacklist = {"90210",
+                  "8675309",  # Jenny
+                  "1004",  # 10-4
+                  # in this document, these were shown to be the least
+                  # commonly used. Now they won't be used at all.
+                  # http://www.datagenetics.com/blog/september32012/index.html
+                  "8068", "8093", "9629", "6835", "7637", "0738", "8398",
+                  "6793", "9480", "8957", "0859", "7394", "6827", "6093",
+                  "7063", "8196", "9539", "0439", "8438", "9047", "8557"}
+
+
+# from itertools recipes
+def _pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = itertools.tee(iterable)
+    next(b, None)
+    return zip(a, b)
+
+
+# from itertools recipes
+def _grouper(n, iterable, fillvalue=None):
+    "Collect data into fixed-length chunks or blocks"
+    # grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
+    args = [iter(iterable)] * n
+    return itertools.zip_longest(*args, fillvalue=fillvalue)
+
+
+def _bad_pin(pin):
+    """Return True if pin is a bad PIN."""
+    # Special case for 4-digits PINs (which are quite common)
+    if len(pin) == 4:
+        # 19xx pins look like years, so might as well ditch them.
+        if pin[:2] == "19" or (pin[:2] == "20" and int(pin[2:]) < 30):
+            return True
+        # 1515
+        if pin[:2] == pin[2:]:
+            return True
+    # Find case where all digits are in pairs (e.g., 1122, 3300447722)
+    if len(pin) % 2 == 0:
+        for a, b in _grouper(2, pin):
+            if a != b:
+                break
+        else:
+            return True
+    # Avoid a numerical run (e.g., 123456, 0000, 9876, 2468)
+    diff = None
+    for a, b in _pairwise(int(c) for c in pin):
+        if diff is not None and diff != b - a:
+            break
+        diff = b - a
+    else:
+        return True
+    # Avoid partial numerical run (e.g., 3000, 5553)
+    consecutive = 0
+    for a, b in _pairwise(pin):
+        if a == b:
+            consecutive += 1
+        else:
+            consecutive = 0
+        if consecutive >= 2:
+            return True
+    # Filter ou special numbers
+    return pin in _pin_blacklist
+
+
+def generate_pin(master, domain, length=4):
+    """Derive a Personal Identification Number (PIN) from a master password and
+    a domain name.
+
+    The domain name will be used as is. Use strip_domain to preprocess a URL.
+
+    Arguments:
+    master -- the master password
+    domain -- the domain name
+    length -- length of the desired PIN
+
+    """
+    master = master.encode('utf-8')
+    domain = domain.encode('utf-8')
+    pin = hotp(master, domain, length)
+    run = 0
+    while _bad_pin(pin) and run < 100:
+        suffix = " " + str(run)
+        pin = hotp(master, domain + suffix.encode('utf-8'), length)
+        run += 1
+    return pin
 
 
 # Set of TLDs from SuperGenPass script

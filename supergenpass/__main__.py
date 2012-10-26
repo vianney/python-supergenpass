@@ -35,6 +35,7 @@ else:
 
 config = configparser.ConfigParser()
 config.read_dict({__package__: {'length': '10',
+                                'pinlength': 4,
                                 'algorithm': 'md5',
                                 'salt': ''}})
 config.read([config_system, config_user])
@@ -49,6 +50,13 @@ def type_length(arg):
     return arg
 
 
+def type_pinlength(arg):
+    arg = int(arg)
+    if arg < 3 or arg > 8:
+        raise argparse.ArgumentTypeError("PIN length must be between 3 and 8")
+    return arg
+
+
 def type_algorithm(arg):
     if arg not in hashlib.algorithms_available:
         raise argparse.ArgumentTypeError("hash algorithm {} is not available"
@@ -60,6 +68,8 @@ parser = argparse.ArgumentParser()
 parser.description = "Derive a SuperGenPass password from a master password " \
                      "and a domain name."
 parser.add_argument("domain", nargs='?', help="domain name")
+parser.add_argument("-p", "--pin", action='store_true',
+                    help="generate a PIN instead of a password")
 group = parser.add_mutually_exclusive_group()
 group.add_argument("-n", "--nostrip", action='store_false', dest='strip',
                    help="use domain name as is without stripping")
@@ -75,6 +85,9 @@ group.add_argument("-l", "--length", type=type_length,
                    default=int(config['length']),
                    help="length of the generated password (default: "
                         "%(default)s)")
+group.add_argument("-L", "--pinlength", type=type_pinlength,
+                   default=int(config['pinlength']),
+                   help="length of the generated PIN (default: %(default)s)")
 group.add_argument("-a", "--algorithm", type=type_algorithm,
                    default=config['algorithm'],
                    help="hash algorithm (default: %(default)s)")
@@ -101,8 +114,10 @@ else:
             else:
                 print("Invalid domain name", file=sys.stderr)
                 sys.exit(1)
-        master = getpass.getpass("Master password: ")
-        print(generate(master + args.salt, domain,
-                       args.length, args.algorithm))
+        master = getpass.getpass("Master password: ") + args.salt
+        if args.pin:
+            print(generate_pin(master, domain, args.pinlength))
+        else:
+            print(generate(master, domain, args.length, args.algorithm))
     except KeyboardInterrupt:
         print()

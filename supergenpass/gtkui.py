@@ -39,14 +39,20 @@ class GtkUI:
         self.window = builder.get_object('main')
         self.f_domain = builder.get_object('domain')
         self.f_master = builder.get_object('master')
+        self.f_method = builder.get_object('method')
         self.f_password = builder.get_object('password')
         self.f_show_password = builder.get_object('show_password')
+        self.f_pin = builder.get_object('pin')
         self.f_length = builder.get_object('length')
+        self.f_pinlength = builder.get_object('pinlength')
         self.f_algorithm = builder.get_object('algorithm')
         self.f_salt = builder.get_object('salt')
         self.f_apply = builder.get_object('apply')
         # setup options
+        self.method = 1 if args.pin else 0
+        self.f_method.set_current_page(self.method)
         self.f_length.set_value(args.length)
+        self.f_pinlength.set_value(args.pinlength)
         index = 0
         for a in hashlib.algorithms_available:
             if a.islower() or a.lower() not in hashlib.algorithms_available:
@@ -54,7 +60,7 @@ class GtkUI:
                 if a in (args.algorithm, args.algorithm.lower()):
                     self.f_algorithm.set_active(index)
                 index += 1
-        self.f_salt.set_text(args.salt)
+        self.f_salt.set_text(args.salt, -1)
         # try to get domain from clipboard
         domain = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY).wait_for_text()
         if domain:
@@ -77,24 +83,35 @@ class GtkUI:
         Gtk.main()
 
     def update_password(self):
-        if self.f_show_password.get_active():
-            self.f_password.set_label(self.password)
-        else:
-            self.f_password.set_label("•" * int(self.f_length.get_value())
-                                      if self.password else "")
-        self.f_apply.set_sensitive(bool(self.password))
+        if self.method == 0:  # Password
+            if self.f_show_password.get_active():
+                self.f_password.set_label(self.password)
+            else:
+                self.f_password.set_label("•" * int(self.f_length.get_value())
+                                          if self.password else "")
+            self.f_apply.set_sensitive(bool(self.password))
+        else:  # PIN
+            self.f_pin.set_label(self.password)
 
     def on_cancel(self, *args):
         Gtk.main_quit()
+
+    def on_method_changed(self, notebook, page, page_num):
+        self.method = page_num
+        self.on_changed()
 
     def on_changed(self, *args):
         domain = self.f_domain.get_text()
         master = self.f_master.get_text()
         if domain and master:
-            self.password = generate(master + self.f_salt.get_text(),
-                                     domain,
-                                     int(self.f_length.get_value()),
-                                     self.f_algorithm.get_active_text())
+            master = master + self.f_salt.get_text()
+            if self.method == 0:  # Password
+                self.password = generate(master, domain,
+                                         int(self.f_length.get_value()),
+                                         self.f_algorithm.get_active_text())
+            else:  # PIN
+                self.password = generate_pin(master, domain,
+                                             int(self.f_pinlength.get_value()))
         else:
             self.password = ""
         self.update_password()
