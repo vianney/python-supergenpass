@@ -8,6 +8,13 @@
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="on_changed" swapped="no"/>
   </object>
+  <object class="GtkAdjustment" id="pinlength">
+    <property name="lower">3</property>
+    <property name="upper">8</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="on_changed" swapped="no"/>
+  </object>
   <object class="GtkEntryBuffer" id="salt">
     <signal name="deleted-text" handler="on_changed" swapped="no"/>
     <signal name="inserted-text" handler="on_changed" swapped="no"/>
@@ -17,7 +24,7 @@
     <property name="border_width">5</property>
     <property name="title">SuperGenPass</property>
     <property name="default_width">400</property>
-    <property name="icon_name">dialog-password</property>
+    <property name="icon_name">supergenpass</property>
     <property name="type_hint">dialog</property>
     <signal name="close" handler="on_cancel" swapped="no"/>
     <child internal-child="vbox">
@@ -552,12 +559,5 @@
       <action-widget response="0">cancel</action-widget>
       <action-widget response="0">apply</action-widget>
     </action-widgets>
-  </object>
-  <object class="GtkAdjustment" id="pinlength">
-    <property name="lower">3</property>
-    <property name="upper">8</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="on_changed" swapped="no"/>
   </object>
 </interface>

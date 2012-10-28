@@ -27,4 +27,6 @@ setup(name="supergenpass",
       packages=['supergenpass'],
       package_data={'supergenpass': ['data/*']},
       scripts=['scripts/supergenpass'],
+      data_files=[('share/pixmaps', ['data/supergenpass.png']),
+                  ('share/applications', ['data/supergenpass.desktop'])],
      )

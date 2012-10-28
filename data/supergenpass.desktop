@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=SuperGenPass
+Comment=Generate passwords and PINs from a master passphrase
+Icon=supergenpass
+Exec=supergenpass -g
+Terminal=false
+Categories=GTK;Utility;Security;
