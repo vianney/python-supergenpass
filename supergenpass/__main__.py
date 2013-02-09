@@ -1,5 +1,5 @@
 # SuperGenPass executable
-# Copyright (C) 2012  Vianney le Clément <vleclement@gmail.com>
+# Copyright (C) 2012-2013  Vianney le Clément de Saint-Marcq <vleclement@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
