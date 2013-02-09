@@ -8,17 +8,6 @@
     <property name="page_increment">10</property>
     <signal name="value-changed" handler="on_changed" swapped="no"/>
   </object>
-  <object class="GtkAdjustment" id="pinlength">
-    <property name="lower">3</property>
-    <property name="upper">8</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <signal name="value-changed" handler="on_changed" swapped="no"/>
-  </object>
-  <object class="GtkEntryBuffer" id="salt">
-    <signal name="deleted-text" handler="on_changed" swapped="no"/>
-    <signal name="inserted-text" handler="on_changed" swapped="no"/>
-  </object>
   <object class="GtkDialog" id="main">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -132,7 +121,7 @@
                   <packing>
                     <property name="left_attach">1</property>
                     <property name="top_attach">0</property>
-                    <property name="width">2</property>
+                    <property name="width">1</property>
                     <property name="height">1</property>
                   </packing>
                 </child>
@@ -143,16 +132,38 @@
                     <property name="hexpand">True</property>
                     <property name="visibility">False</property>
                     <property name="activates_default">True</property>
-                    <property name="primary_icon_stock">gtk-dialog-authentication</property>
                     <property name="input_purpose">password</property>
                     <signal name="changed" handler="on_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
                     <property name="top_attach">1</property>
-                    <property name="width">2</property>
+                    <property name="width">1</property>
                     <property name="height">1</property>
                   </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="confirm">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="hexpand">True</property>
+                    <property name="visibility">False</property>
+                    <property name="invisible_char">●</property>
+                    <property name="activates_default">True</property>
+                    <property name="invisible_char_set">True</property>
+                    <property name="placeholder_text">Confirm password</property>
+                    <property name="input_purpose">password</property>
+                    <signal name="changed" handler="on_changed" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">2</property>
+                    <property name="width">1</property>
+                    <property name="height">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
                 </child>
               </object>
               <packing>
@@ -559,5 +570,16 @@
       <action-widget response="0">cancel</action-widget>
       <action-widget response="0">apply</action-widget>
     </action-widgets>
+  </object>
+  <object class="GtkAdjustment" id="pinlength">
+    <property name="lower">3</property>
+    <property name="upper">8</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <signal name="value-changed" handler="on_changed" swapped="no"/>
+  </object>
+  <object class="GtkEntryBuffer" id="salt">
+    <signal name="deleted-text" handler="on_changed" swapped="no"/>
+    <signal name="inserted-text" handler="on_changed" swapped="no"/>
   </object>
 </interface>

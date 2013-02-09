@@ -31,6 +31,13 @@ class GtkUI:
         args -- arguments given on the command line
 
         """
+        # load custom style
+        css = Gtk.CssProvider()
+        css.load_from_path(os.path.join(data_dir, 'style.css'))
+        screen = Gdk.Screen.get_default()
+        ctx = Gtk.StyleContext()
+        ctx.add_provider_for_screen(screen, css,
+                                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         # load ui file
         builder = Gtk.Builder()
         builder.add_from_file(os.path.join(data_dir, 'main.ui'))
@@ -39,6 +46,7 @@ class GtkUI:
         self.window = builder.get_object('main')
         self.f_domain = builder.get_object('domain')
         self.f_master = builder.get_object('master')
+        self.f_confirm = builder.get_object('confirm')
         self.f_method = builder.get_object('method')
         self.f_password = builder.get_object('password')
         self.f_show_password = builder.get_object('show_password')
@@ -103,7 +111,15 @@ class GtkUI:
     def on_changed(self, *args):
         domain = self.f_domain.get_text()
         master = self.f_master.get_text()
-        if domain and master:
+        confirm = self.f_confirm.get_text()
+        if not confirm:
+            confirm = master
+        ctx = self.f_confirm.get_style_context()
+        if master != confirm:
+            ctx.add_class('invalid')
+        else:
+            ctx.remove_class('invalid')
+        if domain and master and master == confirm:
             master = master + self.f_salt.get_text()
             if self.method == 0:  # Password
                 self.password = generate(master, domain,

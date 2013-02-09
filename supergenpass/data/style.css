@@ -1,0 +1,5 @@
+GtkEntry.invalid {
+    color: @error_fg_color;
+    background-image: none;
+    background-color: @error_bg_color;
+}
