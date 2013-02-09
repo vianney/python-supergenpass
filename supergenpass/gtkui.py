@@ -89,9 +89,9 @@ class GtkUI:
             else:
                 self.f_password.set_label("•" * int(self.f_length.get_value())
                                           if self.password else "")
-            self.f_apply.set_sensitive(bool(self.password))
         else:  # PIN
             self.f_pin.set_label(self.password)
+        self.f_apply.set_sensitive(bool(self.password))
 
     def on_cancel(self, *args):
         Gtk.main_quit()
