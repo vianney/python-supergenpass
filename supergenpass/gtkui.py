@@ -60,6 +60,8 @@ class GtkUI:
         self.f_algorithm = builder.get_object('algorithm')
         self.f_salt = builder.get_object('salt')
         self.f_apply = builder.get_object('apply')
+        self.f_expanders = [builder.get_object('expander1'),
+                            builder.get_object('expander2')]
         # setup options
         self.method = 1 if args.pin else 0
         self.f_method.set_current_page(self.method)
@@ -149,7 +151,10 @@ class GtkUI:
     def on_show_password_toggled(self, checkbox):
         self.update_password()
 
-    def on_options_toggled(self, *args):
+    def on_options_toggled(self, expander):
+        for w in self.f_expanders:
+            if w != expander:
+                w.set_expanded(not expander.get_expanded())
         self.window.resize(self.window.get_size()[0], 1)
 
     def on_apply(self, button):
